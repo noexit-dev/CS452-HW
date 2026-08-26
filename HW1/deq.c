@@ -80,18 +80,29 @@ static Data get(Rep r, End e) {
 
 // rem: return by == comparing, len-- (iff found)
 static Data rem(Rep r, End e, Data d) {
-  if (e >= 2) ERROR("Error: invalid end passed"); // error checking for 
+  if (e >= Ends) ERROR("Error: invalid end passed"); // error checking for 
   
+  if (r->len == 0) {
+    return NULL;
+  }
+
+  End opposite = e == Head ? Tail : Head;
+
   Node currNode = r->ht[e];
   for (int i = 0; i < r->len; i++){
     if (currNode->data == d){
-      currNode->np[e]; //TODO find out how to connect the next and previous nodes together
-
-      currNode->np[0] // the one before it sets pointer to next one TODO
-
-      return currNode;
+      Node prev = currNode->np[opposite];
+      Node next = currNode->np[e];
+      prev->np[e] = next;
+      break;
     }
+    currNode = currNode->np[e];
   }
+  if (currNode == NULL) {
+    return NULL;
+  }
+
+  return currNode->data;
 
 }
 
