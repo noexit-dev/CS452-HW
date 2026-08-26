@@ -25,7 +25,7 @@ typedef struct {
   int len; 
 } *Rep;  
 
-static Rep rep(Deq q) { // checks for zero pointer, empty list? and return Deq casted as Rep
+static Rep rep(Deq q) { // checks for zero/null pointer, empty list? and return Deq casted as Rep
   if (!q) ERROR("zero pointer");
   return (Rep)q;
 }
@@ -36,30 +36,63 @@ static void put(Rep r, End e, Data d) {
   // rep is deq
   // take data and make node?
 
-  Node newnode = (Node)malloc(sizeof(*Node)) //create newnode
+  Node * newNode = malloc(sizeof(Node)); //create newnode
   
-  Node *headtail = r->ht[e] //grabs head or tail node pointer and puts in temp pointer
+  //need to malloc np pointer array and data
 
-  newnode-> //add as new np pointer without losing list ugh TODO
+  newNode->np = malloc(Ends * sizeof(struct Node));
+
+  // Node *headtail = r->ht[e]; //grabs head or tail node pointer and puts in temp pointer
+
+  // newnode-> //add as new np pointer without losing list ugh TODO
 
 
-  newnode->data = d; //pass in data
+  newNode->data = d; //pass in data
   
 }
 
 // ith: return by 0-base index, len unchanged
-static Data ith(Rep r, End e, int i)  {
-  return 0; 
+static Data ith(Rep r, End e, int i) {
+  if (e >= 2) ERROR("Error: invalid end passed"); // error checking for 
+  
+  Node currNode = r->ht[e];
+  for (int count = 0; count < i; count++){
+    currNode = r->ht[e]->np[e];
+  } 
+
+  return currNode->data;
 }
 
 // get: return from an end (could be either head or tail), len--
-static Data get(Rep r, End e)         { 
-  return 0; 
+static Data get(Rep r, End e) {
+  if (e >= 2) ERROR("Error: invalid end passed"); // error checking for 
+
+  Node foundNode = r->ht[e];
+  
+  //making new head/tail
+
+  r->ht[e] = r->ht[e]->np[e];
+
+  r->len -= 1;
+
+  return foundNode;
 }
 
 // rem: return by == comparing, len-- (iff found)
 static Data rem(Rep r, End e, Data d) {
-   return 0; 
+  if (e >= 2) ERROR("Error: invalid end passed"); // error checking for 
+  
+  Node currNode = r->ht[e];
+  for (int i = 0; i < r->len; i++){
+    if (currNode->data == d){
+      currNode->np[e]; //TODO find out how to connect the next and previous nodes together
+
+      currNode->np[0] // the one before it sets pointer to next one TODO
+
+      return currNode;
+    }
+  }
+
 }
 
 extern Deq deq_new() {
