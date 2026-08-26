@@ -23,7 +23,7 @@ typedef struct Node { //Node "object"
 typedef struct {
   Node ht[Ends];                // head/tail nodes
   int len; 
-} *Rep; 
+} *Rep;  
 
 static Rep rep(Deq q) { // checks for zero pointer, empty list? and return Deq casted as Rep
   if (!q) ERROR("zero pointer");
