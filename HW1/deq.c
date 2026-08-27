@@ -32,23 +32,32 @@ static Rep rep(Deq q) { // checks for zero/null pointer, empty list? and return 
 
 // put: append onto an end (could be either head or tail), len++
 static void put(Rep r, End e, Data d) {
+
+  Node newNode = malloc(sizeof(Node)); //create newnode
+
+  
+
+
+
   //zero checking already done by rep
   // rep is deq
   // take data and make node?
 
-  Node * newNode = malloc(sizeof(Node)); //create newnode
+
+  // //need to malloc np pointer array and data
+
+  // newNode->np = malloc(Ends * sizeof(struct Node));
+
+  // // Node *headtail = r->ht[e]; //grabs head or tail node pointer and puts in temp pointer
+
+  // // newnode-> //add as new np pointer without losing list ugh TODO
+
+
+  // newNode->data = d; //pass in data
   
-  //need to malloc np pointer array and data
-
-  newNode->np = malloc(Ends * sizeof(struct Node));
-
-  // Node *headtail = r->ht[e]; //grabs head or tail node pointer and puts in temp pointer
-
-  // newnode-> //add as new np pointer without losing list ugh TODO
 
 
-  newNode->data = d; //pass in data
-  
+
 }
 
 // ith: return by 0-base index, len unchanged
@@ -132,7 +141,7 @@ extern void deq_map(Deq q, DeqMapF f) {
     f(n->data);
 }
 
-extern void deq_del(Deq q, DeqMapF f) {
+extern void deq_del(Deq q, DeqMapF f) { //free function is so that we know what to free inside of it
   if (f) deq_map(q,f);
   Node curr=rep(q)->ht[Head];
   while (curr) {
