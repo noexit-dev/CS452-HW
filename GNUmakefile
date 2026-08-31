@@ -20,7 +20,9 @@ $(prog): $(objs) ; $(ld) -o $@ $^ $(ldflags)
 
 .PHONY: clean run valgrind
 
-clean:: ; rm -f $(prog) *.o *.d *.i try vgcore.*
+clean:: ; rm -f $(prog) *.o *.d *.i try 
+
+# vgcore.*
 
 run:      $(prog) ; ./$< $(args)
 valgrind: $(prog) ; $@ --leak-check=full --show-leak-kinds=all ./$< $(args)

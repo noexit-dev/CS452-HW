@@ -32,87 +32,124 @@ static Rep rep(Deq q) { // checks for zero/null pointer, empty list? and return 
 
 // put: append onto an end (could be either head or tail), len++
 static void put(Rep r, End e, Data d) {
+  if (e >= Ends) ERROR("Error: invalid end passed"); // error checking for if it is an invalid end
 
-  Node newNode = malloc(sizeof(Node)); //create newnode
+  End inverse = e == Head ? Tail : Head; //grab inverse based on what end is given
 
+  Node newNode = malloc(sizeof(*newNode)); //create newnode
+  if (newNode == NULL) return;
+
+  newNode->np[e] = 0;
+  newNode->np[inverse] = 0;
+  newNode->data = d;
+
+  Node currNode = r->ht[e]; //grab ht node
+
+  if (r->len == 0) { //empty list
+    r->ht[e] = newNode;
+    r->ht[inverse] = newNode;
+
+  } else { //general case
   
-
-
-
-  //zero checking already done by rep
-  // rep is deq
-  // take data and make node?
-
-
-  // //need to malloc np pointer array and data
-
-  // newNode->np = malloc(Ends * sizeof(struct Node));
-
-  // // Node *headtail = r->ht[e]; //grabs head or tail node pointer and puts in temp pointer
-
-  // // newnode-> //add as new np pointer without losing list ugh TODO
-
-
-  // newNode->data = d; //pass in data
+    newNode->np[inverse] = currNode; //sets prev node for newnode to ht
   
+    currNode->np[e] = newNode; //sets next node for ht to newnode
+  
+    r->ht[e] = newNode; //sets new ht to newnode
+  }
 
-
-
+  r->len += 1; //increment len
 }
 
 // ith: return by 0-base index, len unchanged
 static Data ith(Rep r, End e, int i) {
-  if (e >= 2) ERROR("Error: invalid end passed"); // error checking for 
+  if (e >= Ends) ERROR("Error: invalid end passed"); // error checking for if it is an invalid end
   
-  Node currNode = r->ht[e];
-  for (int count = 0; count < i; count++){
-    currNode = r->ht[e]->np[e];
+  if (r->len == 0) { //if list is of len 0
+    return NULL;
+  }
+
+  //TODO: add bound checking (return 0 if out of bounds)
+
+  End inverse = e == Head ? Tail : Head; //grab inverse based on what end is given
+
+  Node currNode = r->ht[e]; // grabs ht based on end given
+  for (int count = 0; count < i; count++){ // increment until i index
+    currNode = currNode->np[inverse]; //grab next node 
   } 
 
-  return currNode->data;
+  return currNode->data; //return data stored in node
 }
 
 // get: return from an end (could be either head or tail), len--
 static Data get(Rep r, End e) {
-  if (e >= 2) ERROR("Error: invalid end passed"); // error checking for 
+  if (e >= Ends) ERROR("Error: invalid end passed"); // error checking for if it is an invalid end
 
-  Node foundNode = r->ht[e];
-  
-  //making new head/tail
+  if (r->len == 0) { //if list is of len 0
+    return NULL;
+  }
 
-  r->ht[e] = r->ht[e]->np[e];
+  End inverse = e == Head ? Tail : Head; //grab inverse based on what end is given
 
-  r->len -= 1;
+  Node currNode = r->ht[e]; //get currNode starting at given end
 
-  return foundNode;
+  r->ht[e] = r->ht[e]->np[inverse];
+
+  r->ht[e]->np[e] = 0;
+
+  r->len -= 1; //decrement len
+
+  Data dataCurr = currNode->data; 
+
+  free(currNode);
+  return dataCurr; //if found return data
 }
 
 // rem: return by == comparing, len-- (iff found)
 static Data rem(Rep r, End e, Data d) {
-  if (e >= Ends) ERROR("Error: invalid end passed"); // error checking for 
-  
-  if (r->len == 0) {
+  if (e >= Ends) ERROR("Error: invalid end passed"); // error checking for if it is an invalid end
+
+  if (r->len == 0) { //if list is of len 0
     return NULL;
   }
 
-  End opposite = e == Head ? Tail : Head;
+  End inverse = e == Head ? Tail : Head; //grab inverse based on what end is given
 
-  Node currNode = r->ht[e];
-  for (int i = 0; i < r->len; i++){
-    if (currNode->data == d){
-      Node prev = currNode->np[opposite];
-      Node next = currNode->np[e];
-      prev->np[e] = next;
-      break;
+  Node currNode = r->ht[e]; //get currNode starting at given end
+
+  if (r->len != 1){ //len is not 1
+
+    for (int i = 0; i < r->len; i++){ //increment through list starting at given end until node is found
+      
+      if (currNode->data == d){
+        Node next = currNode->np[e]; //grab next node
+
+        if (currNode == r->ht[Head] || currNode == r->ht[Tail]){ //update ht node to be the next node if ht removed
+          r->ht[e] = next;
+        }
+
+        Node prev = currNode->np[inverse]; //grab prev node
+        prev->np[e] = next; //set prev next pointer to next to prepare for removal
+        next->np[inverse] = prev; //set next prev pointer to prev to prep for removal
+        break;
+      }
+      currNode = currNode->np[e]; //go to next node
     }
-    currNode = currNode->np[e];
+    if (currNode == NULL) { //if currNode is null, then not found and return null
+      return NULL;
+    }
+  } else { 
+    if (currNode != d) { // len is 1 and is not == to d
+      return NULL;
+    }
   }
-  if (currNode == NULL) {
-    return NULL;
-  }
+    
+  r->len -= 1; //decrement len
 
-  return currNode->data;
+  Data dataCurr = currNode->data; 
 
+  free(currNode);
+  return dataCurr; //if found return data
 }
 
 extern Deq deq_new() {
