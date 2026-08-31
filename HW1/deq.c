@@ -127,15 +127,15 @@ static Data rem(Rep r, End e, Data d) {
     for (int i = 0; i < r->len; i++){ //increment through list starting at given end until node is found
       
       if (currNode->data == d){
-        Node next = currNode->np[e]; //grab next node
+        Node next = currNode->np[inverse]; //grab next node
 
         if (currNode == r->ht[Head] || currNode == r->ht[Tail]){ //update ht node to be the next node if ht removed
           r->ht[e] = next;
         }
 
-        Node prev = currNode->np[inverse]; //grab prev node
-        prev->np[e] = next; //set prev next pointer to next to prepare for removal
-        next->np[inverse] = prev; //set next prev pointer to prev to prep for removal
+        Node prev = currNode->np[e]; //grab prev node
+        prev->np[inverse] = next; //set prev next pointer to next to prepare for removal
+        next->np[e] = prev; //set next prev pointer to prev to prep for removal
         break;
       }
       currNode = currNode->np[e]; //go to next node
@@ -146,6 +146,9 @@ static Data rem(Rep r, End e, Data d) {
   } else { 
     if (currNode != d) { // len is 1 and is not == to d
       return NULL;
+    } else {
+      r->ht[Head] = NULL;
+      r->ht[Tail] = NULL;
     }
   }
     
