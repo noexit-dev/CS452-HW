@@ -93,9 +93,14 @@ static Data get(Rep r, End e) {
 
   Node currNode = r->ht[e]; //get currNode starting at given end
 
-  r->ht[e] = r->ht[e]->np[inverse];
+  Node newEnd = currNode->np[inverse]; //grab next pointer to be the new end
+  r->ht[e] = newEnd; //set ht to next pointer
 
-  r->ht[e]->np[e] = 0;
+  if (newEnd){ //if newEnd exists set pointer to old ht to null
+    r->ht[e]->np[e] = NULL;
+  } else { //if not then set inverse to null and stay empty
+    r->ht[inverse] = NULL; //list is empty
+  }
 
   r->len -= 1; //decrement len
 

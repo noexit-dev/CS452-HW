@@ -26,8 +26,10 @@ int main() {
   Data get_h = deq_head_get(q);
   Data get_h2 = deq_head_get(q);
   Data get_h3 = deq_head_get(q);
+  Data get_h4 = deq_head_get(q);
   Data get_t = deq_tail_get(q);
   Data get_t2 = deq_tail_get(q);
+
 
 
 
