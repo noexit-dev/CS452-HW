@@ -121,42 +121,51 @@ static Data rem(Rep r, End e, Data d) {
   End inverse = e == Head ? Tail : Head; //grab inverse based on what end is given
 
   Node currNode = r->ht[e]; //get currNode starting at given end
+  Data dataCurr = NULL;
+  int get_true = 0;
 
-  if (r->len != 1){ //len is not 1
-
-    for (int i = 0; i < r->len; i++){ //increment through list starting at given end until node is found
+  for (int i = 0; i < r->len; i++){ //increment through list starting at given end until node is found
+    if (i == 0 && currNode->data == d){ //if len is 1
+      break;
+    }
+    if (currNode->data == d){
+      Node next = currNode->np[inverse]; //grab next node
       
-      if (currNode->data == d){
-        Node next = currNode->np[inverse]; //grab next node
-
-        if (currNode == r->ht[Head] || currNode == r->ht[Tail]){ //update ht node to be the next node if ht removed
-          r->ht[e] = next;
-        }
-
-        Node prev = currNode->np[e]; //grab prev node
-        prev->np[inverse] = next; //set prev next pointer to next to prepare for removal
-        next->np[e] = prev; //set next prev pointer to prev to prep for removal
-        break;
+      if (currNode == r->ht[Head] || currNode == r->ht[Tail]){ //update ht node to be the next node if ht removed
+        r->ht[e] = next;
       }
-      currNode = currNode->np[e]; //go to next node
+      
+      Node prev = currNode->np[e]; //grab prev node
+      prev->np[inverse] = next; //set prev next pointer to next to prepare for removal
+      next->np[e] = prev; //set next prev pointer to prev to prep for removal
+      break;
     }
-    if (currNode == NULL) { //if currNode is null, then not found and return null
-      return NULL;
-    }
-  } else { 
-    if (currNode != d) { // len is 1 and is not == to d
-      return NULL;
-    } else {
-      r->ht[Head] = NULL;
-      r->ht[Tail] = NULL;
-    }
+    currNode = currNode->np[e]; //go to next node
   }
+
+  
+  if (currNode == NULL) { //if currNode is null, then not found and return null
+    return NULL;
+  } else if (get_true == 1){
+    dataCurr = get(r, e);
+  } else {
+    dataCurr = currNode->data; 
+    free(currNode);
+  }
+
+  // if (r->len != 1){ //len is not 1
+
+  // } else { 
+  //   if (currNode != d) { // len is 1 and is not == to d
+  //     return NULL;
+  //   } else {
+  //     r->ht[Head] = NULL;
+  //     r->ht[Tail] = NULL;
+  //   }
+  // }
     
   r->len -= 1; //decrement len
 
-  Data dataCurr = currNode->data; 
-
-  free(currNode);
   return dataCurr; //if found return data
 }
 
