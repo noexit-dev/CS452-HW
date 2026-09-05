@@ -120,10 +120,37 @@ static Data rem(Rep r, End e, Data d) {
 
   End inverse = e == Head ? Tail : Head; //grab inverse based on what end is given
 
-  Node currNode = r->ht[e]; //get currNode starting at given end
+  Node currNode; //get currNode starting at given end
   Data dataCurr = NULL;
-  int get_true = 0;
+  // int get_true = 0;
 
+  for (currNode = r->ht[e]; currNode != NULL && currNode->data != d; currNode = currNode->np[inverse]) {
+  }
+
+  if (currNode == NULL) {
+    return dataCurr;
+  } else {
+    dataCurr = currNode->data;
+    Node next = currNode->np[inverse]; //grab next node
+    Node prev = currNode->np[e]; //grab prev node
+    
+    if (prev != NULL){
+      prev->np[inverse] = next; //set prev next pointer to next to prepare for removal
+    }
+
+    if(next != NULL){
+      next->np[e] = prev; //set next prev pointer to prev to prep for removal
+    }
+    
+    free(currNode);
+    r->len--; //decrement len
+    return dataCurr;
+  }
+
+
+
+
+  /*
   for (int i = 0; i < r->len; i++){ //increment through list starting at given end until node is found
     if (i == 0 && currNode->data == d){ //if len is 1
       break;
@@ -152,6 +179,7 @@ static Data rem(Rep r, End e, Data d) {
     dataCurr = currNode->data; 
     free(currNode);
   }
+  */
 
   // if (r->len != 1){ //len is not 1
 
@@ -164,9 +192,8 @@ static Data rem(Rep r, End e, Data d) {
   //   }
   // }
     
-  r->len -= 1; //decrement len
 
-  return dataCurr; //if found return data
+  // return dataCurr; //if found return data
 }
 
 extern Deq deq_new() {
