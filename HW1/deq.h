@@ -14,8 +14,8 @@ extern int deq_len(Deq q);
 
 extern void deq_head_put(Deq q, Data d);
 extern Data deq_head_get(Deq q);
-extern Data deq_head_ith(Deq q, int i); //return 0 for error and then client prints error and continue/terminates at that point
-extern Data deq_head_rem(Deq q, Data d); //remove when successful return d/ unsuccessful return 0 if not found
+extern Data deq_head_ith(Deq q, int i);
+extern Data deq_head_rem(Deq q, Data d);
 
 extern void deq_tail_put(Deq q, Data d);
 extern Data deq_tail_get(Deq q);
