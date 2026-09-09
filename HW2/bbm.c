@@ -2,10 +2,11 @@
 #include "bm.h"
 #include "utils.h"
 
+//calculates size of mmap
 static size_t mapsize(size_t size, int e) {
-  size_t blocksize=e2size(e);
-  size_t blocks=divup(size,blocksize);
-  size_t buddies=divup(blocks,2);
+  size_t blocksize=e2size(e); //calculates size of block using order of block
+  size_t blocks=divup(size,blocksize); //
+  size_t buddies=divup(blocks,2); 
   return buddies;
 }
 
