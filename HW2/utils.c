@@ -1,13 +1,15 @@
 #include "utils.h"
 #include <sys/mman.h>
+#include <math.h>
 
 //mmalloc calls mmap which is a memory map and it's a function pointer so i believe it will have the location of the mmap as well
-extern void *mmalloc(size_t size){
-    mmap(0,size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1,0); //This may return MAP_FAILED
+extern void * mmalloc(size_t size){
+    return mmap(0,size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1,0); //This may return MAP_FAILED
 }
 
 //frees memory map
 extern void mmfree(void *p, size_t size){
+    if (p == "NULL") return;
     munmap(p, size);
 }
 
@@ -22,7 +24,7 @@ extern size_t bits2bytes(size_t bits){
 }
 
 extern size_t e2size(int e){
-    return (size_t) (2^e);
+    return (size_t) (pow(2,e));
 }
 
 extern int size2e(size_t size){
@@ -30,17 +32,17 @@ extern int size2e(size_t size){
 }
 
 extern void bitset(void *p, int bit){
-
+    unsigned int mask = 1<<bit;
+    return (unsigned int)p | mask; 
 }
 
 extern void bitclr(void *p, int bit){
-
+    unsigned int mask = 1<<bit;
+    *p = (unsigned int)*p | mask; 
 }
 
-extern void bitinv(void *p, int bit){
-
+extern void bitinv(void *p, int bit){ 
+    unsigned int mask = 1<<bit;
+    *p = (unsigned int)*p | mask;
 }
 
-extern int  bittst(void *p, int bit){
-
-}
