@@ -1,4 +1,6 @@
 // A baddr bitmap, for the Buddy System.
+//buddy address
+
 
 #ifndef BBM_H
 #define BBM_H

@@ -2,7 +2,7 @@
 #include "bm.h"
 #include "utils.h"
 
-//calculates size of mmap
+//calculates size of of buddy bitmap
 static size_t mapsize(size_t size, int e) {
   size_t blocksize=e2size(e); //calculates size of block using order of block
   size_t blocks=divup(size,blocksize); //

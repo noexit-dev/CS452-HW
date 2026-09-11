@@ -32,8 +32,8 @@ extern int size2e(size_t size){
 }
 
 extern void bitset(void *p, int bit){
-    unsigned int mask = 1<<bit;
-    return (unsigned int)p | mask; 
+    // unsigned int mask = 1<<bit;
+    // return (unsigned int)p | mask; 
 }
 
 extern void bitclr(void *p, int bit){
@@ -43,6 +43,6 @@ extern void bitclr(void *p, int bit){
 
 extern void bitinv(void *p, int bit){ 
     unsigned int mask = 1<<bit;
-    *p = (unsigned int)*p | mask;
+    *p = *p ^ mask; //TODO deref ptr and toggle associated bit
 }
 
