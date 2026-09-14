@@ -28,21 +28,21 @@ extern size_t e2size(int e){
 }
 
 extern int size2e(size_t size){
-    return (int) log2(size); //order of block TODO this is probably not right
+    return (int) log2(size);
 }
 
 extern void bitset(void *p, int bit){
-    // unsigned int mask = 1<<bit;
-    // return (unsigned int)p | mask; 
+    unsigned int mask = 1<<bit;
+    *(unsigned int *)p |= mask; 
 }
 
 extern void bitclr(void *p, int bit){
-    unsigned int mask = 1<<bit;
-    *p = (unsigned int)*p | mask; 
+    unsigned int mask = ~(1<<bit);
+    *(unsigned int *)p &= mask; 
 }
 
 extern void bitinv(void *p, int bit){ 
     unsigned int mask = 1<<bit;
-    *p = *p ^ mask; //TODO deref ptr and toggle associated bit
+    *(unsigned int *)p ^= mask;
 }
 
