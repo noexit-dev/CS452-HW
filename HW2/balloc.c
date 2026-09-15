@@ -1,22 +1,46 @@
 #include "balloc.h"
 #include "bbm.h"
 #include "utils.h"
+#include "freelist.h"
 #include <math.h>
 
-// typedef struct BRep {
-//     int l; //lowest order
-//     int u; //highest (max) order
-// } *BRep;  
+
+typedef struct {
+    int lower_order;
+    int upper_order;
+    unsigned int poolsize;   
+    void * baseaddr;
+    BlockList blocklist;
+    FreeList freelist;
+    // blockmem; //what would block mem be? mmalloc
+} *BRep; //balloc representation
+
+typedef struct {
+    unsigned int blocklist;
+} *BlockList;
 
 
-//check if size is greater than u
-//create a check comparing the size of the order to the size and see if you can break it up
-//add metadata and freelist here maybe?
-//upper arg is max order
+size_t metasize(int l, int u){
+    //u-l creates size of freelist arr
+    size_t metasize = 2 * sizeof(int) + sizeof(unsigned int) + sizeof(void *);
+
+    //organize metadata as the following: l / u / poolsize / baseaddr (8 bytes) / blocklist (struct unsigned int arr of length l) / freelist (struct of ptr (8 bytes) and bitmap (char * which is going to be 2^l+1 / 8 to find amount of bytes))
+
+}
+
 extern Balloc bcreate(unsigned int size, int l, int u){
-    //construct free list
     //set lower order value somewhere (maybe even upper value)
-    return bbmcreate(size, u);
+
+    BRep brep; //create rep
+    brep->lower_order = l;
+    brep->upper_order = u;
+    brep->poolsize = lower_power_of_2(size);
+    brep->baseaddr = mmalloc(size);
+    brep->freelist = freelistcreate(size, l, u); 
+    // brep->blockmem =  //alloc size of block (round to floor pow of 2)
+    
+    //in order to get size of meta + pool i need size of meta
+    
 }
 
 extern void bdelete(Balloc pool){

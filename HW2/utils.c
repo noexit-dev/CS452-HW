@@ -15,7 +15,7 @@ extern void mmfree(void *p, size_t size){
 
 //divides size_t n by size_t d
 extern size_t divup(size_t n, size_t d){
-    return (n / d);
+    return ceil(n / d);
 }
 
 //converts bits to bytes
@@ -28,7 +28,22 @@ extern size_t e2size(int e){
 }
 
 extern int size2e(size_t size){
-    return (int) log2(size); //ceiling of this TODO
+    return (int) ceil(log2(size));
+}
+
+extern unsigned int lower_power_of_2(unsigned int n) {
+    if (n == 0) return 0;
+    
+    // Flood all lower bits with 1s
+    n |= (n >> 1);
+    n |= (n >> 2);
+    n |= (n >> 4);
+    n |= (n >> 8);
+    n |= (n >> 16);
+    
+    // n is now (next_higher_power - 1). 
+    // Shift right by 1 and add 1 to get the lower power.
+    return (n >> 1) + 1;
 }
 
 extern void bitset(void *p, int bit){
