@@ -1,4 +1,4 @@
-prog=balloc
+prog=main
 
 include ../GNUmakefile
 

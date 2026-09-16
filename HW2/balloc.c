@@ -11,17 +11,15 @@ typedef struct {
 } *Metadata;
 
 typedef struct {
+    Metadata metadataaddr;
     void * baseaddr;
-    Metadata * metadataaddr;
     // FreeList * freelistaddr;
 } *BRep; //balloc representation
 
 BRep brep;
 
-size_t metasize(int u, int l, unsigned int poolsize){
-    size_t baseaddr_l_u_poolsize = sizeof(void *) + (sizeof(int) * 2) + sizeof(unsigned int);
-    size_t blocklist_size = ((poolsize / e2size(l)) * 4);
-    size_t metasize = baseaddr_l_u_poolsize + blocklist_size;
+size_t metasize(){
+    size_t metasize = (sizeof(int) * 2) + sizeof(unsigned int);
     return metasize;
 }
 
@@ -29,17 +27,19 @@ extern Balloc bcreate(unsigned int size, int l, int u){
     //create poolsize rounding to lowest power of 2
     unsigned int poolsize = higher_power_of_2(size);
     
-    //allocating data
-    Metadata * metadata = mmalloc(metasize(u,l,size));
-    // FreeList * freelist = freelistcreate(size, l, u);
+    //allocating Balloc Representation TODO add freelist
+    brep = mmalloc(sizeof(struct { Metadata metadataaddr; void * baseaddr; }));
     
-    Balloc * pool = mmalloc(poolsize);
+    //allocating metadata struct, freelist, and pool
+    Metadata metadata = mmalloc(sizeof(*metadata));
+    // // FreeList * freelist = freelistcreate(size, l, u);
+    void * pool = mmalloc(poolsize);
     
-    //storing metadata
+    // //storing metadata
     brep->metadataaddr = metadata;
-    (*brep->metadataaddr)->lower_order = l;
-    (*brep->metadataaddr)->upper_order = u;
-    (*brep->metadataaddr)->poolsize = poolsize;
+    metadata->lower_order = l;
+    metadata->upper_order = u;
+    metadata->poolsize = poolsize;
     brep->baseaddr = pool;
 
     // brep->freelistaddr = freelist;
@@ -47,6 +47,10 @@ extern Balloc bcreate(unsigned int size, int l, int u){
     // (*brep->freelistaddr)[u-l]->freebm = bbmcreate(poolsize,u-l);
 
     return (Balloc) brep;
+
+    // void *mock_ptr = (void *)0x1000;
+    
+    // return mock_ptr;
 }
 
 extern void bdelete(Balloc pool){
@@ -75,6 +79,21 @@ extern unsigned int bsize(Balloc pool, void *mem){
     return 1;
 }
 
+//this function will not work if wrapper class is in hw directory
 extern void bprint(Balloc pool){
+     if (pool == NULL) {
+        printf("Error: bprint called with a NULL Balloc pool.\n");
+        return;
+    }
+
+    void * base = ((BRep)pool)->baseaddr;
+    Metadata meta = ((BRep)pool)->metadataaddr;
+
+    printf("Base Address: %p \n", base);
+    printf("Metadata Address: %p \n", meta);
+    printf("- Lower Order: %d \n", meta->lower_order);
+    printf("- Upper Order: %d \n", meta->upper_order);
+    printf("- Pool Size: %u \n", meta->poolsize);
+
 
 }

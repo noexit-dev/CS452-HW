@@ -2,12 +2,13 @@
 // #include "bm.h"
 // #include "bbm.h"
 // #include "freelist.h"
+#include "balloc.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "balloc.h"
 
 int main(){
-    printf("Hello World \n");
+    Balloc pool = bcreate(32, 1, 1);
+    bprint(pool);
 
     return 0;
 }
