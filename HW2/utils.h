@@ -14,6 +14,8 @@ extern size_t bits2bytes(size_t bits);
 extern size_t e2size(int e);
 extern int size2e(size_t size);
 
+extern unsigned int higher_power_of_2(unsigned int n);
+
 extern void bitset(void *p, int bit);
 extern void bitclr(void *p, int bit);
 extern void bitinv(void *p, int bit);

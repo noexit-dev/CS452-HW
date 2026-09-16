@@ -1,6 +1,6 @@
+#include <math.h>
 #include "utils.h"
 #include <sys/mman.h>
-#include <math.h>
 
 //mmalloc calls mmap which is a memory map and it's a function pointer so i believe it will have the location of the mmap as well
 extern void * mmalloc(size_t size){
@@ -9,7 +9,7 @@ extern void * mmalloc(size_t size){
 
 //frees memory map
 extern void mmfree(void *p, size_t size){
-    if (p == "NULL") return;
+    if (p == 0) return;
     munmap(p, size);
 }
 
@@ -31,8 +31,9 @@ extern int size2e(size_t size){
     return (int) ceil(log2(size));
 }
 
-extern unsigned int lower_power_of_2(unsigned int n) {
-    if (n == 0) return 0;
+extern unsigned int higher_power_of_2(unsigned int n) {
+    if (n == 0) return 1; // 1 is 2^0, the smallest power of 2
+    n--;
     
     // Flood all lower bits with 1s
     n |= (n >> 1);
@@ -41,10 +42,10 @@ extern unsigned int lower_power_of_2(unsigned int n) {
     n |= (n >> 8);
     n |= (n >> 16);
     
-    // n is now (next_higher_power - 1). 
-    // Shift right by 1 and add 1 to get the lower power.
-    return (n >> 1) + 1;
+    // n is now (higher_power - 1). Adding 1 rolls it over to the next power.
+    return n + 1;
 }
+
 
 extern void bitset(void *p, int bit){
     unsigned int mask = 1<<bit;

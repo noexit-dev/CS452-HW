@@ -16,7 +16,9 @@ ldflags+=-g
 
 ld?=gcc
 
-$(prog): $(objs) ; $(ld) -o $@ $^ $(ldflags)
+LDLIBS += -lm
+
+$(prog): $(objs) ; $(ld) -o $@ $^ $(ldflags) $(LDLIBS)
 
 .PHONY: clean run valgrind
 
