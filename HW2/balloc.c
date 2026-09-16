@@ -13,7 +13,7 @@ typedef struct {
 typedef struct {
     Metadata metadataaddr;
     void * baseaddr;
-    // FreeList * freelistaddr;
+    FreeList freelistaddr;
 } *BRep; //balloc representation
 
 BRep brep;
@@ -23,16 +23,16 @@ size_t metasize(){
     return metasize;
 }
 
-extern Balloc bcreate(unsigned int size, int l, int u){
+extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest possible order you can go
     //create poolsize rounding to lowest power of 2
     unsigned int poolsize = higher_power_of_2(size);
     
     //allocating Balloc Representation TODO add freelist
-    brep = mmalloc(sizeof(struct { Metadata metadataaddr; void * baseaddr; }));
+    brep = mmalloc(sizeof(struct { Metadata metadataaddr; void * baseaddr; FreeList * freelistaddr;}));
     
     //allocating metadata struct, freelist, and pool
     Metadata metadata = mmalloc(sizeof(*metadata));
-    // // FreeList * freelist = freelistcreate(size, l, u);
+    FreeList freelist = freelistcreate(poolsize, l, u); //mmap puts it at the highest possible address space? TODO: ask buff.
     void * pool = mmalloc(poolsize);
     
     // //storing metadata
@@ -42,15 +42,11 @@ extern Balloc bcreate(unsigned int size, int l, int u){
     metadata->poolsize = poolsize;
     brep->baseaddr = pool;
 
-    // brep->freelistaddr = freelist;
-    // ((FreeListElement )(brep->freelistaddr))[u-l]->head = pool;
+    brep->freelistaddr = freelist;
+    ((FreeList)brep->freelistaddr)[u-l]->head = pool;
     // (*brep->freelistaddr)[u-l]->freebm = bbmcreate(poolsize,u-l);
 
     return (Balloc) brep;
-
-    // void *mock_ptr = (void *)0x1000;
-    
-    // return mock_ptr;
 }
 
 extern void bdelete(Balloc pool){
@@ -88,12 +84,17 @@ extern void bprint(Balloc pool){
 
     void * base = ((BRep)pool)->baseaddr;
     Metadata meta = ((BRep)pool)->metadataaddr;
+    FreeList freelist = ((BRep)pool)->freelistaddr;
 
     printf("Base Address: %p \n", base);
+    
     printf("Metadata Address: %p \n", meta);
     printf("- Lower Order: %d \n", meta->lower_order);
     printf("- Upper Order: %d \n", meta->upper_order);
     printf("- Pool Size: %u \n", meta->poolsize);
+
+    printf("FreeList Address: %p \n", freelist);
+
 
 
 }
