@@ -24,7 +24,9 @@ was allocated from that list
 typedef void *FreeList;
 
 extern FreeList freelistcreate(size_t size, int l, int u);
-extern void     freelistdelete(FreeList f, int l, int u);
+extern void freelist_set_head(FreeList f, int e, void *head); //f is freelist ptr / e is which order/idx of freelist /  head* is the ptr you would like to set as the head
+extern void freelist_set_bm(FreeList f, int e, char *freebm); //f is freelist ptr / e is which order/idx of freelist /  head* is the ptr you would like to set as the head
+extern void freelistdelete(FreeList f, int l, int u);
 
 extern void *freelistalloc(FreeList f, void *base, int e, int l);
 extern void  freelistfree(FreeList f, void *base, void *mem, int e, int l);

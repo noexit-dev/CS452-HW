@@ -4,7 +4,7 @@
 
 typedef struct {
     void * head;
-    unsigned char * freebm; //byte representation
+    char * freebm; //byte representation
 } FreeListElement;
 
 // size_t freelistsize(int u, int l, unsigned int poolsize){
@@ -18,8 +18,16 @@ typedef struct {
 // }
 
 extern FreeList freelistcreate(size_t size, int l, int u){
-    FreeList * freelist = mmalloc(sizeof(FreeListElement) * (u-l));
+    FreeList * freelist = mmalloc(sizeof(FreeListElement) * (u-l + 1));
     return freelist;
+} //TODO add error handling for creation of freelist
+
+extern void freelist_set_head(FreeList f, int idx, void *head){
+    ((FreeListElement *)f)[idx].head = head;
+}
+
+extern void freelist_set_bm(FreeList f, int idx, char * freebm){
+    ((FreeListElement *)f)[idx].freebm = freebm;
 }
 
 extern void freelistdelete(FreeList f, int l, int u){
@@ -41,6 +49,12 @@ extern int freelistsize(FreeList f, void *base, void *mem, int l, int u){
 }
 
 extern void freelistprint(FreeList f, int l, int u){
-    
+    if (f == NULL) return;
+
+    printf("FreeList Address: %p \n", f);
+    printf("- Lower Order: %d \n", l);
+    printf("- Upper Order: %d \n", u);
+
+
 }
 

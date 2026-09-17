@@ -26,6 +26,8 @@ size_t metasize(){
 extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest possible order you can go
     //create poolsize rounding to lowest power of 2
     unsigned int poolsize = higher_power_of_2(size);
+    int freelist_arr_length = u-l;
+    char * freebm = bbmcreate(poolsize,freelist_arr_length);
     
     //allocating Balloc Representation TODO add freelist
     brep = mmalloc(sizeof(struct { Metadata metadataaddr; void * baseaddr; FreeList * freelistaddr;}));
@@ -43,8 +45,8 @@ extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest pos
     brep->baseaddr = pool;
 
     brep->freelistaddr = freelist;
-    ((FreeList)brep->freelistaddr)[u-l]->head = pool;
-    // (*brep->freelistaddr)[u-l]->freebm = bbmcreate(poolsize,u-l);
+    freelist_set_head((FreeList)brep->freelistaddr, freelist_arr_length, brep->baseaddr);
+    freelist_set_bm((FreeList)brep->freelistaddr, freelist_arr_length, freebm);
 
     return (Balloc) brep;
 }
@@ -86,15 +88,13 @@ extern void bprint(Balloc pool){
     Metadata meta = ((BRep)pool)->metadataaddr;
     FreeList freelist = ((BRep)pool)->freelistaddr;
 
-    printf("Base Address: %p \n", base);
-    
     printf("Metadata Address: %p \n", meta);
     printf("- Lower Order: %d \n", meta->lower_order);
     printf("- Upper Order: %d \n", meta->upper_order);
     printf("- Pool Size: %u \n", meta->poolsize);
-
-    printf("FreeList Address: %p \n", freelist);
-
-
+    
+    freelistprint(freelist, meta->lower_order, meta->upper_order);
+    
+    printf("Base Address: %p \n", base);
 
 }
