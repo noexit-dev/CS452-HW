@@ -35,9 +35,15 @@ extern void freelistdelete(FreeList f, int l, int u){
 }
 
 extern void *freelistalloc(FreeList f, void *base, int e, int l){
-    void *mock_ptr = (void *)0x1000;
-    
-    return mock_ptr;
+    if(!((FreeListElement *)f)[e].head){
+        return NULL;
+    } else {
+
+        
+    }
+
+
+
 }
 
 extern void  freelistfree(FreeList f, void *base, void *mem, int e, int l){
@@ -54,7 +60,5 @@ extern void freelistprint(FreeList f, int l, int u){
     printf("FreeList Address: %p \n", f);
     printf("- Lower Order: %d \n", l);
     printf("- Upper Order: %d \n", u);
-
-
 }
 

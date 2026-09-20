@@ -8,8 +8,10 @@
 #include <stdlib.h>
 
 int main(){
-    Balloc pool = bcreate(32, 3, 3);
+    Balloc pool = bcreate(32,5,5);
     bprint(pool);
+
+    void * ptr = balloc(pool, 32);
 
     return 0;
 }

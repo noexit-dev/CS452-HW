@@ -16,7 +16,6 @@ typedef struct {
     FreeList freelistaddr;
 } *BRep; //balloc representation
 
-BRep brep;
 
 size_t metasize(){
     size_t metasize = (sizeof(int) * 2) + sizeof(unsigned int);
@@ -24,6 +23,8 @@ size_t metasize(){
 }
 
 extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest possible order you can go
+    BRep brep;
+
     //create poolsize rounding to lowest power of 2
     unsigned int poolsize = higher_power_of_2(size);
     int freelist_arr_length = u-l;
@@ -63,10 +64,24 @@ extern void * balloc(Balloc pool, unsigned int size){
     // }
 
     //check order of size
-    // order = size2e(size);
-    void *mock_ptr = (void *)0x1000;
+    int order = size2e(size);
+
+    FreeList freelist = ((BRep)pool)->freelistaddr;
+    Metadata meta = ((BRep)pool)->metadataaddr;
+    int freelist_length = meta->upper_order - meta->lower_order;
     
-    return mock_ptr;
+
+    
+    //for freelist at order list go until you find freeblock
+    
+    for(int i = meta->lower_order; i < meta->upper_order; i++){
+        //start at lower order
+        if (){
+            
+        }
+
+    }
+
 }
 
 extern void  bfree(Balloc pool, void *mem){
@@ -74,7 +89,7 @@ extern void  bfree(Balloc pool, void *mem){
 }
 
 extern unsigned int bsize(Balloc pool, void *mem){
-    return 1;
+    
 }
 
 //this function will not work if wrapper class is in hw directory
