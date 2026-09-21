@@ -34,16 +34,15 @@ extern void freelistdelete(FreeList f, int l, int u){
     
 }
 
-extern void *freelistalloc(FreeList f, void *base, int e, int l){
-    if(!((FreeListElement *)f)[e].head){
+extern void *freelistalloc(FreeList f, void *base, int e, int u){ //e target order
+    if(!((FreeListElement *)f)[e].head){ 
         return NULL;
     } else {
+        if (((FreeListElement *)f)[e].head){
+            
+        }
 
-        
     }
-
-
-
 }
 
 extern void  freelistfree(FreeList f, void *base, void *mem, int e, int l){
