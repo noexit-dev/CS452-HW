@@ -19,9 +19,6 @@ typedef struct {
 
 extern FreeList freelistcreate(size_t size, int l, int u){ //push buddies
     FreeList * freelist = mmalloc(sizeof(FreeListElement) * (u-l + 1));
-    (FreeListElement *)
-
-
     return freelist;
 } //TODO add error handling for creation of freelist
 
@@ -59,29 +56,23 @@ extern void *freelistalloc(FreeList f, void *base, int e, int u){ //e target ord
             int target_order = current_order - 1;
             size_t buddy_size = e2size(target_order);
     
-            // 2. Calculate the exact byte address of the second buddy
             void* buddy2 = (void*)(buddy1 + buddy_size);
-    
-            // 3. Push both into the smaller order's tracking struct.
-            // This automatically overwrites their first 8 bytes with the updated tracking links.
+
             push_free_block(f, target_order, buddy2);
             push_free_block(f, target_order, buddy1);
 
             current_order--;
         }
-
     }
-
-
     
     if (*(void**)(free_lists[e].head) != NULL) { //if there is a next pointer set head to what is next
         free_lists[e].head == *(void**)(free_lists[e].head);
     }
+
     //if there isn't a next pointer return to caller free to remove
     freeblock = free_lists[e].head;
     free_lists[e].head = NULL;
     return freeblock;
-    
 }
 
 void push_free_block(FreeList f, int order, void * new_block){
