@@ -32,6 +32,26 @@ void *pop_free_block(FreeList f,  int order) {
     return block_to_allocate;
 }
 
+void split_block(FreeList f, int current_order, int target_order){
+    //split logic
+    int curr = current_order;
+
+    while (curr != target_order){ //split down one order until target order
+        void* buddy1 = pop_free_block(f, curr);
+        if (buddy1 == NULL) return;
+
+        int inter = curr - 1; //intermediate
+        size_t buddy_size = e2size(inter);
+
+        void* buddy2 = (void*)(buddy1 + buddy_size);
+
+        push_free_block(f, target_order, buddy2);
+        push_free_block(f, target_order, buddy1);
+
+        curr--;
+    }
+}
+
 extern FreeList freelistcreate(size_t size, int l, int u){ //push buddies
     FreeList * freelist = mmalloc(sizeof(FreeListElement) * (u-l + 1));
     return freelist;
@@ -54,6 +74,7 @@ extern void *freelistalloc(FreeList f, void *base, int e, int l, int u){ //e tar
     FreeListElement* free_lists = (FreeListElement*)f;
     void * freeblock; //the block to be allocated
 
+    int target_order = e-l;
     int current_order = e-l;
 
     if (free_lists[current_order].head == NULL){ //is an exact-size block free? no, so split buddies
@@ -63,22 +84,8 @@ extern void *freelistalloc(FreeList f, void *base, int e, int l, int u){ //e tar
             }
             current_order++;
         }
-
-        //split logic
-        while (current_order != e){ //split down one order until target order
-            void* buddy1 = pop_free_block(f, current_order);
-            if (buddy1 == NULL) return NULL;
+        split_block(f, current_order, target_order);
     
-            int target_order = current_order - 1;
-            size_t buddy_size = e2size(target_order);
-    
-            void* buddy2 = (void*)(buddy1 + buddy_size);
-
-            push_free_block(f, target_order, buddy2);
-            push_free_block(f, target_order, buddy1);
-
-            current_order--;
-        }
     }
     
     freeblock = free_lists[current_order].head;
@@ -92,7 +99,6 @@ extern void *freelistalloc(FreeList f, void *base, int e, int l, int u){ //e tar
     return freeblock;
 }
 
-
 //freeing an allocation in the allocator by putting it back on the freelist and coalescing
 extern void  freelistfree(FreeList f, void *base, void *mem, int e, int l){
     
@@ -104,7 +110,7 @@ extern int freelistsize(FreeList f, void *base, void *mem, int l, int u){
     int found = 0;
 
     while (found == 0){
-        if (bbmtst(free_list[current_order].freebm, base, mem, current_order) == 1){
+        if (bbmtst(free_list[current_order].freebm, base, mem, current_order) == 1){ //TODO: bmbits has weird thing happening
             found++;
         } else {
             if (current_order > u){

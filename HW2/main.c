@@ -10,5 +10,8 @@ int main(){
 
     printf("\nPointer to First Allocation: %p\n", ptr);
 
+    unsigned int size = bsize(pool, ptr);
+
+    printf("\nSize of First Allocation: %d\n", size);
     return 0;
 }

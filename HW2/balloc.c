@@ -41,6 +41,7 @@ extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest pos
  
     brep->freelistaddr = freelist;
     freelist_set_head((FreeList)brep->freelistaddr, freelist_arr_length, brep->baseaddr); //TODO: figure out how to populate freelist at upper order if there are more than 1 free blocks
+    //TODO: push however many blocks to start with at upper order
     freelist_set_bm((FreeList)brep->freelistaddr, freelist_arr_length, freebm);
 
     return (Balloc) brep;
