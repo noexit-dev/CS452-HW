@@ -16,7 +16,7 @@ typedef struct {
     FreeList freelistaddr;
 } *BRep; //balloc representationg
 
-extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest possible order you can go
+extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest possible order you can go. printing an error or returning 0 or null
     BRep brep;
 
     //create poolsize rounding to lowest power of 2
