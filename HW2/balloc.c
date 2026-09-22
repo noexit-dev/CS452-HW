@@ -57,14 +57,14 @@ extern void * balloc(Balloc pool, unsigned int size){
 
     //check order of size
     int order = size2e(size);
+
     if (order < meta->lower_order){
         order = meta->lower_order;
     }
 
-    int freelist_length = meta->upper_order - meta->lower_order;
     FreeList freelist = ((BRep)pool)->freelistaddr;
     
-    return freelistalloc(freelist, (BRep)pool, order, meta->upper_order);
+    return freelistalloc(freelist, ((BRep)pool)->baseaddr, order, meta->lower_order, meta->upper_order);
 }
 
 //freeing an allocation in the allocator
@@ -74,10 +74,12 @@ extern void  bfree(Balloc pool, void *mem){
 
 extern unsigned int bsize(Balloc pool, void *mem){
     Metadata meta = ((BRep)pool)->metadataaddr;
+    FreeList freelist = ((BRep)pool)->freelistaddr;
 
-    
 
-
+    // check each bm from l all the way to u until you find a bit that is allocated
+    return freelistsize(freelist, pool, mem, meta->upper_order, meta->lower_order);
+    //then you return the size at that order
 }
 
 //this function will not work if wrapper class is in hw directory
