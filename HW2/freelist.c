@@ -7,16 +7,6 @@ typedef struct {
     char * freebm; //byte representation
 } FreeListElement;
 
-// size_t freelistsize(int u, int l, unsigned int poolsize){
-//     size_t head_ptrs_size = (u-l)* sizeof(void *);
-//     size_t bitmap_size = 0;
-//     for(int i = u; i < l; i--){
-//         size_t pairs = poolsize / e2size(i+1);
-//         bitmap_size += ceil(((double)pairs)/8);
-//     }
-//     size_t freelist_size = head_ptrs_size + bitmap_size;
-// }
-
 extern FreeList freelistcreate(size_t size, int l, int u){ //push buddies
     FreeList * freelist = mmalloc(sizeof(FreeListElement) * (u-l + 1));
     return freelist;
@@ -30,13 +20,14 @@ extern void freelist_set_bm(FreeList f, int idx, char * freebm){
     ((FreeListElement *)f)[idx].freebm = freebm;
 }
 
+//freeing freelist for allocator 
 extern void freelistdelete(FreeList f, int l, int u){
-    
+    mmfree(f, sizeof(FreeListElement) * (u-l + 1));
 }
 
 extern void *freelistalloc(FreeList f, void *base, int e, int u){ //e target order //u is the highest order to take from 
     FreeListElement* free_lists = (FreeListElement*)f;
-    void * freeblock;
+    void * freeblock; //the block to be allocated
 
     int current_order = e;
 
@@ -65,13 +56,14 @@ extern void *freelistalloc(FreeList f, void *base, int e, int u){ //e target ord
         }
     }
     
+    freeblock = free_lists[e].head;
+
     if (*(void**)(free_lists[e].head) != NULL) { //if there is a next pointer set head to what is next
         free_lists[e].head == *(void**)(free_lists[e].head);
+    } else { //if there isn't a next pointer set head to null
+        free_lists[e].head = NULL;
     }
 
-    //if there isn't a next pointer return to caller free to remove
-    freeblock = free_lists[e].head;
-    free_lists[e].head = NULL;
     return freeblock;
 }
 
@@ -84,7 +76,7 @@ void push_free_block(FreeList f, int order, void * new_block){
     free_lists[order].head = new_block;
 };
 
-void* pop_free_block(FreeList f,  int order) {
+void *pop_free_block(FreeList f,  int order) {
     FreeListElement* free_lists = (FreeListElement*)f;
 
     void* block_to_allocate = free_lists[order].head;
@@ -100,6 +92,7 @@ void* pop_free_block(FreeList f,  int order) {
     return block_to_allocate;
 }
 
+//freeing an allocation in the allocator by putting it back on the freelist and coalescing
 extern void  freelistfree(FreeList f, void *base, void *mem, int e, int l){
     
 }
