@@ -7,7 +7,7 @@ typedef struct {
     char * freebm; //byte representation
 } FreeListElement;
 
-void push_free_block(FreeList f, int order, void * new_block){
+extern void push_free_block(FreeList f, int order, void * new_block){
     FreeListElement* free_lists = (FreeListElement*)f;
 
     if (new_block == NULL) return;
@@ -16,7 +16,7 @@ void push_free_block(FreeList f, int order, void * new_block){
     free_lists[order].head = new_block;
 };
 
-void *pop_free_block(FreeList f,  int order) {
+extern void *pop_free_block(FreeList f,  int order) {
     FreeListElement* free_lists = (FreeListElement*)f;
 
     void* block_to_allocate = free_lists[order].head;
@@ -32,7 +32,7 @@ void *pop_free_block(FreeList f,  int order) {
     return block_to_allocate;
 }
 
-void split_block(FreeList f, int current_order, int target_order){
+extern void split_block(FreeList f, int current_order, int target_order){
     //split logic
     int curr = current_order;
 
@@ -79,7 +79,7 @@ extern void *freelistalloc(FreeList f, void *base, int e, int l, int u){ //e tar
 
     if (free_lists[current_order].head == NULL){ //is an exact-size block free? no, so split buddies
         while(free_lists[current_order].head == NULL){ //find order that has free blocks
-            if (current_order > u){
+            if (current_order > u-l){
                 break;
             }
             current_order++;
@@ -88,13 +88,15 @@ extern void *freelistalloc(FreeList f, void *base, int e, int l, int u){ //e tar
     
     }
     
-    freeblock = free_lists[current_order].head;
+    freeblock = free_lists[target_order].head;
 
-    if (free_lists[current_order].head != NULL && *(void**)(free_lists[current_order].head) != NULL) { //if there is a next pointer set head to what is next
-        free_lists[current_order].head = *(void**)(free_lists[current_order].head);
+    if (free_lists[target_order].head != NULL && *(void**)(free_lists[target_order].head) != NULL) { //if there is a next pointer set head to what is next
+        free_lists[target_order].head = *(void**)(free_lists[target_order].head);
     } else { //if there isn't a next pointer set head to null
-        free_lists[current_order].head = NULL;
+        free_lists[target_order].head = NULL;
     }
+
+    bbmset(free_lists[target_order].freebm, base, freeblock, target_order);
 
     return freeblock;
 }
@@ -106,7 +108,7 @@ extern void  freelistfree(FreeList f, void *base, void *mem, int e, int l){
 
 extern int freelistsize(FreeList f, void *base, void *mem, int l, int u){
     FreeListElement * free_list = (FreeListElement *)f;
-    int current_order = l;
+    int current_order = u-l;
     int found = 0;
 
     while (found == 0){
@@ -123,7 +125,7 @@ extern int freelistsize(FreeList f, void *base, void *mem, int l, int u){
     if (found == 0){
         return 0;
     }
-    return e2size(current_order);
+    return e2size(current_order+l);
 }
 
 extern void freelistprint(FreeList f, int l, int u){

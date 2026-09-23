@@ -40,9 +40,19 @@ extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest pos
     brep->baseaddr = pool;
  
     brep->freelistaddr = freelist;
-    freelist_set_head((FreeList)brep->freelistaddr, freelist_arr_length, brep->baseaddr); //TODO: figure out how to populate freelist at upper order if there are more than 1 free blocks
+    
     //TODO: push however many blocks to start with at upper order
-    freelist_set_bm((FreeList)brep->freelistaddr, freelist_arr_length, freebm);
+    if (size2e(poolsize) > u){
+        int num_of_buddies = poolsize / e2size(u);
+
+        for (int i = 0; i < num_of_buddies; i++){
+            push_free_block(freelist, freelist_arr_length, (pool + (e2size(u) * i)));
+        }
+    } else {
+        freelist_set_head(freelist, freelist_arr_length, brep->baseaddr); //TODO: figure out how to populate freelist at upper order if there are more than 1 free blocks
+    }
+    freelist_set_bm(freelist, freelist_arr_length, freebm);
+
 
     return (Balloc) brep;
 }
@@ -58,6 +68,9 @@ extern void * balloc(Balloc pool, unsigned int size){
 
     //check order of size
     int order = size2e(size);
+    if (order > meta->upper_order){
+        return NULL;
+    }
 
     if (order < meta->lower_order){
         order = meta->lower_order;
@@ -79,7 +92,7 @@ extern unsigned int bsize(Balloc pool, void *mem){
 
 
     // check each bm from l all the way to u until you find a bit that is allocated
-    return freelistsize(freelist, pool, mem, meta->upper_order, meta->lower_order);
+    return freelistsize(freelist, ((BRep)pool)->baseaddr, mem, meta->lower_order, meta->upper_order);
     //then you return the size at that order
 }
 
