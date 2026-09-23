@@ -102,8 +102,22 @@ extern void *freelistalloc(FreeList f, void *base, int e, int l, int u){ //e tar
 }
 
 //freeing an allocation in the allocator by putting it back on the freelist and coalescing
-extern void  freelistfree(FreeList f, void *base, void *mem, int e, int l){
-    
+extern void freelistfree(FreeList f, void *base, void *mem, int e, int l, int u){
+    FreeListElement * free_list = (FreeListElement *)f;
+    int current_order = u-l;
+    int found = 0;
+
+    while (found == 0){
+        if (bbmtst(free_list[current_order].freebm, base, mem, current_order) == 1){ //found allocation at order
+            baddrinv(base, mem, e); //find inverse of mem at mem
+        } else {
+            if (current_order > u){
+                break;
+            }
+            current_order++;
+        }    
+    }
+
 }
 
 extern int freelistsize(FreeList f, void *base, void *mem, int l, int u){

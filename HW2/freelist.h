@@ -33,7 +33,7 @@ extern void push_free_block(FreeList f, int order, void * new_block);
 extern void *pop_free_block(FreeList f, int order);
 extern void split_block(FreeList f, int current_order, int target_order);
 
-extern void  freelistfree(FreeList f, void *base, void *mem, int e, int l);
+extern void  freelistfree(FreeList f, void *base, void *mem, int e, int l, int u);
 
 extern int freelistsize(FreeList f, void *base, void *mem, int l, int u);
 extern void freelistprint(FreeList f, int l, int u);
