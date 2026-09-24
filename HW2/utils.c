@@ -15,7 +15,7 @@ extern void mmfree(void *p, size_t size){
 
 //divides size_t n by size_t d
 extern size_t divup(size_t n, size_t d){
-    return ceil(n / d);
+    return ceil(1.0 * n / d);
 }
 
 //converts bits to bytes
