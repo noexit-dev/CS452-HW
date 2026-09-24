@@ -22,7 +22,7 @@ extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest pos
     //create poolsize rounding to lowest power of 2
     unsigned int poolsize = higher_power_of_2(size);
     int freelist_arr_length = u-l;
-    char * freebm = bbmcreate(poolsize,freelist_arr_length);
+    // char * freebm = bbmcreate(poolsize,freelist_arr_length);
     
     //allocating Balloc Representation TODO add freelist
     brep = mmalloc(sizeof(struct { Metadata metadataaddr; void * baseaddr; FreeList * freelistaddr;}));
@@ -51,8 +51,7 @@ extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest pos
     } else {
         freelist_set_head(freelist, freelist_arr_length, brep->baseaddr); //TODO: figure out how to populate freelist at upper order if there are more than 1 free blocks
     }
-    freelist_set_bm(freelist, freelist_arr_length, freebm);
-
+    // freelist_set_bm(freelist, freelist_arr_length, freebm);
 
     return (Balloc) brep;
 }
@@ -83,7 +82,10 @@ extern void * balloc(Balloc pool, unsigned int size){
 
 //freeing an allocation in the allocator
 extern void  bfree(Balloc pool, void *mem){
-
+    Metadata meta = ((BRep)pool)->metadataaddr;
+    FreeList freelist = ((BRep)pool)->freelistaddr;
+    
+    freelistfree(freelist, ((BRep)pool)->baseaddr, mem, meta->upper_order, meta->lower_order);
 }
 
 extern unsigned int bsize(Balloc pool, void *mem){

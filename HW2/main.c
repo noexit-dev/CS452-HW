@@ -25,5 +25,8 @@ int main(){
     unsigned int size3 = bsize(pool, ptr3);
     printf("\nSize of Third Allocation: %d\n", size3);
 
+    bfree(pool, ptr2);
+    bfree(pool, ptr3);
+
     return 0;
 }
