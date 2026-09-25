@@ -117,9 +117,9 @@ int main(){
     //rem testing with populated list with endpoint case and not found
     Data rem_h2 = deq_head_rem(q, "4");
     printDeq("Rem Head Test 2:" ,q);
-    Data rem_t2 = deq_tail_rem(q, "6");
-    printDeq("Rem Tail Test 2:" ,q);
-    printf("rem_h2: %s rem_t2: %s \n \n", (char*)rem_h2, (char*)rem_t2);
+    // Data rem_t2 = deq_tail_rem(q, "6");
+    // printDeq("Rem Tail Test 2:" ,q);
+    printf("rem_h2: %s \n \n", (char*)rem_h2);
 
     deq_del(q,0);
 

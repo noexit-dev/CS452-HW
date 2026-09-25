@@ -1,4 +1,5 @@
 #include "freelist.h"
+#include "utils.h"
 #include "bbm.h"
 
 typedef struct {
@@ -269,7 +270,7 @@ extern int freelistsize(FreeList f, void *base, void *mem, int l, int u){
  */
 extern void freelistprint(FreeList f, int l, int u){
     if (f == NULL) return;
-    FreeListElement * freelist = (FreeListElement*)f;
+    // FreeListElement * freelist = (FreeListElement*)f;
 
     printf("FreeList Address: %p \n", f);
     printf("- Lower Order: %d \n", l);
