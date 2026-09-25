@@ -4,27 +4,42 @@
 #include "utils.h"
 #include "freelist.h"
 
+/**
+ * @brief metadata representation
+ * 
+ */
 typedef struct {
     int lower_order;
     int upper_order;
     unsigned int poolsize;  
 } *Metadata;
 
+/**
+ * @brief balloc representation
+ * 
+ */
 typedef struct {
     Metadata metadataaddr;
     void * baseaddr;
     FreeList freelistaddr;
-} *BRep; //balloc representationg
+} *BRep;
 
-extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest possible order you can go. printing an error or returning 0 or null
+/**
+ * @brief creates a Buddy Allocator
+ * 
+ * @param size - size of Allocator
+ * @param l - lowest order of Allocator (lowest can be 2^3, which is size of pointer)
+ * @param u - highest order of Allocator
+ * @return Balloc - returns pointer to Buddy Allocator or NULL/0 if failed
+ */
+extern Balloc bcreate(unsigned int size, int l, int u){
     BRep brep;
 
     //create poolsize rounding to lowest power of 2
     unsigned int poolsize = higher_power_of_2(size);
     int freelist_arr_length = u-l;
-    // char * freebm = bbmcreate(poolsize,freelist_arr_length);
     
-    //allocating Balloc Representation TODO add freelist
+    //allocating Balloc Representation
     brep = mmalloc(sizeof(struct { Metadata metadataaddr; void * baseaddr; FreeList * freelistaddr;}));
     
     //allocating metadata struct, freelist, and pool
@@ -38,10 +53,8 @@ extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest pos
     metadata->upper_order = u;
     metadata->poolsize = poolsize;
     brep->baseaddr = pool;
- 
     brep->freelistaddr = freelist;
     
-    //TODO: push however many blocks to start with at upper order
     if (size2e(poolsize) > u){
         int num_of_buddies = poolsize / e2size(u);
 
@@ -49,19 +62,28 @@ extern Balloc bcreate(unsigned int size, int l, int u){ // 2^3 is the lowest pos
             push_free_block(freelist, freelist_arr_length, (pool + (e2size(u) * i)));
         }
     } else {
-        freelist_set_head(freelist, freelist_arr_length, brep->baseaddr); //TODO: figure out how to populate freelist at upper order if there are more than 1 free blocks
+        freelist_set_head(freelist, freelist_arr_length, brep->baseaddr);
     }
-    // freelist_set_bm(freelist, freelist_arr_length, freebm);
 
     return (Balloc) brep;
 }
 
-//freeing the allocator
+/**
+ * @brief deletes/frees the Buddy Allocator
+ * 
+ * @param pool - pointer to the Buddy Allocator
+ */
 extern void bdelete(Balloc pool){
     mmfree(pool, sizeof(struct { Metadata metadataaddr; void * baseaddr; FreeList * freelistaddr;}));
 }
 
-//allocates mem of size bytes from pool (bcreate)
+/**
+ * @brief Allocates memory from the Buddy Allocator based on size request
+ * 
+ * @param pool - pointer to Buddy Allocator
+ * @param size - size request
+ * @return void* - pointer to allocation
+ */
 extern void * balloc(Balloc pool, unsigned int size){
     Metadata meta = ((BRep)pool)->metadataaddr;
 
@@ -80,7 +102,12 @@ extern void * balloc(Balloc pool, unsigned int size){
     return freelistalloc(freelist, ((BRep)pool)->baseaddr, order, meta->lower_order, meta->upper_order);
 }
 
-//freeing an allocation in the allocator
+/**
+ * @brief frees an allocation from the Buddy Allocator
+ * 
+ * @param pool - pointer to Buddy Allocator
+ * @param mem - pointer to memory address to be freed
+ */
 extern void  bfree(Balloc pool, void *mem){
     Metadata meta = ((BRep)pool)->metadataaddr;
     FreeList freelist = ((BRep)pool)->freelistaddr;
@@ -88,17 +115,27 @@ extern void  bfree(Balloc pool, void *mem){
     freelistfree(freelist, ((BRep)pool)->baseaddr, mem, meta->upper_order, meta->lower_order);
 }
 
+/**
+ * @brief returns size of an allocation
+ * 
+ * @param pool - pointer to Buddy Allocator
+ * @param mem - pointer to memory address of allocation
+ * @return unsigned int - size of allocation in bytes
+ */
 extern unsigned int bsize(Balloc pool, void *mem){
     Metadata meta = ((BRep)pool)->metadataaddr;
     FreeList freelist = ((BRep)pool)->freelistaddr;
 
-
     // check each bm from l all the way to u until you find a bit that is allocated
-    return freelistsize(freelist, ((BRep)pool)->baseaddr, mem, meta->lower_order, meta->upper_order);
     //then you return the size at that order
+    return freelistsize(freelist, ((BRep)pool)->baseaddr, mem, meta->lower_order, meta->upper_order);
 }
 
-//this function will not work if wrapper class is in hw directory
+/**
+ * @brief prints Buddy Allocator information
+ * 
+ * @param pool - pointer to Buddy Allocator
+ */
 extern void bprint(Balloc pool){
      if (pool == NULL) {
         printf("Error: bprint called with a NULL Balloc pool.\n");
@@ -117,5 +154,4 @@ extern void bprint(Balloc pool){
     freelistprint(freelist, meta->lower_order, meta->upper_order);
     
     printf("Base Address: %p \n", base);
-
 }

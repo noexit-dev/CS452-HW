@@ -1,12 +1,18 @@
 #include "freelist.h"
 #include "bbm.h"
-#include "utils.h"
 
 typedef struct {
-    void * head;
+    void * head; //pointer to head of freeblock
     char * freebm; //byte representation
 } FreeListElement;
 
+/**
+ * @brief Pushes free block to a certain order on the free list.
+ * 
+ * @param f - pointer to freelist
+ * @param order - order of block to be pushed at
+ * @param new_block - pointer to the new free block in the pool
+ */
 extern void push_free_block(FreeList f, int order, void * new_block){
     FreeListElement* free_lists = (FreeListElement*)f;
 
@@ -16,6 +22,13 @@ extern void push_free_block(FreeList f, int order, void * new_block){
     free_lists[order].head = new_block;
 }
 
+/**
+ * @brief Pops free block of a certain order on the free list
+ * 
+ * @param f - pointer to freelist
+ * @param order - order of block to be popped off
+ * @return void* - pointer to free block to allocate
+ */
 extern void *pop_free_block(FreeList f,  int order) {
     FreeListElement* free_lists = (FreeListElement*)f;
 
@@ -32,6 +45,14 @@ extern void *pop_free_block(FreeList f,  int order) {
     return block_to_allocate;
 }
 
+/**
+ * @brief splits the block of a certain order
+ * 
+ * @param f - pointer to freelist
+ * @param current_order - order where free blocks are
+ * @param target_order - order of blocks we are trying to get
+ * @param l - lower order from Buddy Allocator
+ */
 extern void split_block(FreeList f, int current_order, int target_order, int l){
     // Split down level by level from current_order to target_order using absolute orders
     void* buddy1;
@@ -51,6 +72,14 @@ extern void split_block(FreeList f, int current_order, int target_order, int l){
 
 }
 
+/**
+ * @brief creates/allocates the freelist and returns a pointer to the start of the list
+ * 
+ * @param size - size of memory pool
+ * @param l - lower order from Buddy Allocator
+ * @param u - upper order from Buddy Allocator
+ * @return FreeList - pointer to freelist
+ */
 extern FreeList freelistcreate(size_t size, int l, int u){
     FreeListElement * freelist = mmalloc(sizeof(FreeListElement) * (u - l + 1));
     if (freelist == NULL) return NULL;
@@ -63,16 +92,25 @@ extern FreeList freelistcreate(size_t size, int l, int u){
     return (FreeList) freelist;
 }
 
+/**
+ * @brief sets the head pointer for a specified index/order on the freelist
+ * 
+ * @param f - pointer to the freelist
+ * @param idx - array index on the freelist
+ * @param head - head pointer to be set
+ */
 extern void freelist_set_head(FreeList f, int idx, void *head){
     if (f == NULL) return;
     ((FreeListElement *)f)[idx].head = head;
 }
 
-extern void freelist_set_bm(FreeList f, int idx, char * freebm){
-    if (f == NULL) return;
-    ((FreeListElement *)f)[idx].freebm = freebm;
-}
-
+/**
+ * @brief deletes/deallocates the freelist specified
+ * 
+ * @param f - pointer to the freelist to be deleted/deallocated
+ * @param l - lower order from the Buddy Allocator
+ * @param u - upper order from the Buddy Allocator
+ */
 extern void freelistdelete(FreeList f, int l, int u){
     if (f == NULL) return;
     int total_orders = (u - l) + 1;
@@ -82,6 +120,16 @@ extern void freelistdelete(FreeList f, int l, int u){
     mmfree(f, sizeof(FreeListElement) * total_orders);
 }
 
+/**
+ * @brief provides a free block at a desired order
+ * 
+ * @param f - pointer to the freelist
+ * @param base - base address of memory pool from the Buddy Allocator
+ * @param e - order of request size
+ * @param l - lower order from the Buddy Allocator
+ * @param u - upper order from the Buddy Allocator
+ * @return void* - pointer to the block of memory to be allocated or NULL if no free block can be allocated
+ */
 extern void *freelistalloc(FreeList f, void *base, int e, int l, int u){ 
     FreeListElement* free_lists = (FreeListElement*)f;
     void * freeblock; 
@@ -113,6 +161,15 @@ extern void *freelistalloc(FreeList f, void *base, int e, int l, int u){
     return freeblock;
 }
 
+/**
+ * @brief frees a block and adds it to the free list. This also coalesces buddy blocks if both are free to create free blocks for bigger requests
+ * 
+ * @param f - pointer to the freelist
+ * @param base - base address of memory pool from the Buddy Allocator
+ * @param mem - memory address of allocated block to be freed
+ * @param u - upper order from the Buddy Allocator
+ * @param l - lower order from the Buddy Allocator
+ */
 extern void freelistfree(FreeList f, void *base, void *mem, int u, int l){
     FreeListElement * free_list = (FreeListElement *)f;
     int current_order = 0;
@@ -172,6 +229,16 @@ extern void freelistfree(FreeList f, void *base, void *mem, int u, int l){
     push_free_block(free_list, current_order, curr_block);
 }    
 
+/**
+ * @brief returns the size of an allocation (not the request) from the memory pool
+ * 
+ * @param f - pointer to the freelist
+ * @param base - base address of memory pool from the Buddy Allocator
+ * @param mem - memory address of allocated block to be freed
+ * @param l - lower order from the Buddy Allocator
+ * @param u - upper order from the Buddy Allocator
+ * @return int - size of allocation as an integer or NULL if allocation is not found in the freelist
+ */
 extern int freelistsize(FreeList f, void *base, void *mem, int l, int u){
     FreeListElement * free_list = (FreeListElement *)f;
     int current_order = 0;
@@ -193,6 +260,13 @@ extern int freelistsize(FreeList f, void *base, void *mem, int l, int u){
     return e2size(current_order + l);
 }
 
+/**
+ * @brief prints information about the freelist. Used for debugging
+ * 
+ * @param f - pointer to the freelist
+ * @param l - lower order from the Buddy Allocator
+ * @param u - upper order from the Buddy Allocator
+ */
 extern void freelistprint(FreeList f, int l, int u){
     if (f == NULL) return;
     FreeListElement * freelist = (FreeListElement*)f;
@@ -201,10 +275,10 @@ extern void freelistprint(FreeList f, int l, int u){
     printf("- Lower Order: %d \n", l);
     printf("- Upper Order: %d \n", u);
 
-    for (int i = 0; i < u-l+1; i++){
-        printf("Head addr at order %d : %p\n", i+l, freelist[i].head);
-        printf("BBM addr at order %d : %p\n", i+l, freelist[i].freebm);
-    }
+    // for (int i = 0; i < u-l+1; i++){
+    //     printf("Head addr at order %d : %p\n", i+l, freelist[i].head);
+    //     printf("BBM addr at order %d : %p\n", i+l, freelist[i].freebm);
+    // }
     // printf("BBM at order %d : %s\n", 11, *(char**)freelist[11].freebm);
     
 }
