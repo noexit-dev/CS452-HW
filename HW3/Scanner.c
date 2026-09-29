@@ -6,18 +6,18 @@
 #include "error.h"
 
 typedef struct {
-  int eos;
+  int eos; //end of string
   char *str;
   char *pos;
   char *curr;
 } *ScannerRep;
 
 extern Scanner newScanner(char *s) {
-  ScannerRep r=(ScannerRep)malloc(sizeof(*r));
+  ScannerRep r=(ScannerRep)malloc(sizeof(*r)); 
   if (!r)
     ERROR("malloc() failed");
-  r->eos=0;
-  r->str=strdup(s);
+  r->eos=0; //sets eos to false
+  r->str=strdup(s); //string duplicate returns ptr to duplicated string
   r->pos=r->str;
   r->curr=0;
   return r;

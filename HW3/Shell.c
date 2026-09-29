@@ -12,8 +12,8 @@
 #include "error.h"
 
 int main() {
-  int eof=0;
-  Jobs jobs=newJobs();
+  int eof=0; //end of file
+  Jobs jobs=newJobs(); //creates job list in deq structure to keep track of jobs 
   char *prompt=0;
 
   if (isatty(fileno(stdin))) {
