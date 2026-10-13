@@ -14,10 +14,7 @@ static void i_sequence(T_sequence t, Sequence sequence);
 static Command i_command(T_command t) {
   if (!t)
     return 0;
-  Command command=0;
-  if (t->words)
-    command=newCommand(t->words);
-  return command;
+  return newCommand(t);
 }
 
 static void i_pipeline(T_pipeline t, Pipeline pipeline) {

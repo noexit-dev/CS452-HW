@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
@@ -10,6 +11,8 @@
 typedef struct {
   char *file;
   char **argv;
+  char *in;
+  char *out;
 } *CommandRep;
 
 #define BIARGS CommandRep r, int *eof, Jobs jobs
@@ -96,18 +99,73 @@ static char **getargs(T_words words) {
   return argv;
 }
 
-extern Command newCommand(T_words words) {
+static int open_input(char *path) {
+  int fd=open(path,O_RDONLY);
+  if (fd==-1)
+    ERROR("open() failed");
+  return fd;
+}
+
+static int open_output(char *path) {
+  int fd=open(path,O_WRONLY|O_CREAT|O_TRUNC,0666);
+  if (fd==-1)
+    ERROR("open() failed");
+  return fd;
+}
+
+static void apply_redirection(CommandRep r, int *saved_stdin, int *saved_stdout) {
+  *saved_stdin=-1;
+  *saved_stdout=-1;
+  if (r->in) {
+    *saved_stdin=dup(STDIN_FILENO);
+    if (*saved_stdin==-1)
+      ERROR("dup() failed");
+    int fd=open_input(r->in);
+    if (dup2(fd,STDIN_FILENO)==-1)
+      ERROR("dup2() failed");
+    close(fd);
+  }
+  if (r->out) {
+    *saved_stdout=dup(STDOUT_FILENO);
+    if (*saved_stdout==-1)
+      ERROR("dup() failed");
+    int fd=open_output(r->out);
+    if (dup2(fd,STDOUT_FILENO)==-1)
+      ERROR("dup2() failed");
+    close(fd);
+  }
+}
+
+static void restore_redirection(int saved_stdin, int saved_stdout) {
+  if (saved_stdin!=-1) {
+    if (dup2(saved_stdin,STDIN_FILENO)==-1)
+      ERROR("dup2() failed");
+    close(saved_stdin);
+  }
+  if (saved_stdout!=-1) {
+    if (dup2(saved_stdout,STDOUT_FILENO)==-1)
+      ERROR("dup2() failed");
+    close(saved_stdout);
+  }
+}
+
+extern Command newCommand(T_command command) {
   CommandRep r=(CommandRep)malloc(sizeof(*r));
   if (!r)
     ERROR("malloc() failed");
-  r->argv=getargs(words);
+  r->argv=getargs(command->words);
   r->file=r->argv[0];
+  r->in=command->in ? strdup(command->in->s) : 0;
+  r->out=command->out ? strdup(command->out->s) : 0;
   return r;
 }
 
 static void child(CommandRep r, int fg) {
   int eof=0;
   Jobs jobs=newJobs();
+  int saved_stdin;
+  int saved_stdout;
+  apply_redirection(r,&saved_stdin,&saved_stdout);
   if (builtin(r,&eof,jobs))
     _exit(0);
   execvp(r->argv[0],r->argv);
@@ -117,8 +175,16 @@ static void child(CommandRep r, int fg) {
 
 extern void execCommand(Command command, Pipeline pipeline, Jobs jobs, int *jobbed, int *eof, int fg) {
   CommandRep r=command;
-  if (fg && builtin(r,eof,jobs))
-    return;
+  int saved_stdin=-1;
+  int saved_stdout=-1;
+  if (fg) {
+    apply_redirection(r,&saved_stdin,&saved_stdout);
+    if (builtin(r,eof,jobs)) {
+      restore_redirection(saved_stdin,saved_stdout);
+      return;
+    }
+    restore_redirection(saved_stdin,saved_stdout);
+  }
   if (!fg && !*jobbed) {
     *jobbed=1;
     addJobs(jobs,pipeline);
@@ -138,6 +204,10 @@ extern void freeCommand(Command command) {
   while (*argv)
     free(*argv++);
   free(r->argv);
+  if (r->in)
+    free(r->in);
+  if (r->out)
+    free(r->out);
   free(r);
 }
 

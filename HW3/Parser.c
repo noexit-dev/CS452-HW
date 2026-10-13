@@ -20,6 +20,8 @@ static int   eat(char *s) { return eatScanner(scan,s); }
 
 static T_word p_word();
 static T_words p_words();
+static T_word p_redir_word();
+static void p_redir(T_command command);
 static T_command p_command();
 static T_pipeline p_pipeline();
 static T_sequence p_sequence();
@@ -46,10 +48,33 @@ static T_words p_words() {
     return 0;
   T_words words=new_words();
   words->word=word;
-  if (cmp("|") || cmp("&") || cmp(";"))
+  if (cmp("|") || cmp("&") || cmp(";") || cmp("<") || cmp(">"))
     return words;
   words->words=p_words();
   return words;
+}
+
+static T_word p_redir_word() {
+  char *s=curr();
+  if (!s)
+    return 0;
+  T_word word=new_word();
+  word->s=strdup(s);
+  next();
+  return word;
+}
+
+static void p_redir(T_command command) {
+  if (eat("<")) {
+    command->in=p_redir_word();
+    if (!command->in)
+      ERROR("missing input file after <");
+  }
+  if (eat(">")) {
+    command->out=p_redir_word();
+    if (!command->out)
+      ERROR("missing output file after >");
+  }
 }
 
 static T_command p_command() {
@@ -59,6 +84,7 @@ static T_command p_command() {
     return 0;
   T_command command=new_command();
   command->words=words;
+  p_redir(command);
   return command;
 }
 
@@ -140,6 +166,10 @@ static void f_command(T_command t) {
   if (!t)
     return;
   f_words(t->words);
+  if (t->in)
+    f_word(t->in);
+  if (t->out)
+    f_word(t->out);
   free(t);
 }
 
