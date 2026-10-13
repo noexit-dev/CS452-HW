@@ -32,12 +32,12 @@ static void f_sequence(T_sequence t);
 
 static T_word p_word() {
   char *s=curr();
-  if (!s)
+  if (!s) //if no word
     return 0;
-  T_word word=new_word();
-  word->s=strdup(s);
+  T_word word=new_word(); //if word
+  word->s=strdup(s); 
   next();
-  return word;
+  return word; //return word parsed
 }
 
 static T_words p_words() {
