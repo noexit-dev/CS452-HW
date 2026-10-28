@@ -1,7 +1,11 @@
 prog=wam
 
-ccflags=-pthread
-ldflags=-pthread -lX11 -lfltk
+#include source code file
+SRCS=wam.cpp
+
+#dynamic flags to automatically adapt to Wayland
+ccflags=-pthread $(shell fltk-config --cxxflags)
+ldflags=-pthread $(shell fltk-config --ldflags)
 
 ld=g++
 
