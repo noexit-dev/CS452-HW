@@ -1,24 +1,26 @@
+#include <stdlib.h>
 #include <pthread.h>
 #include "thread.h"
 
-pthread_t * thread;
-int n = 0;
+// call consume n times creating n threads
+// it will consume n produce calls which creates another n threads
 
-int create_thread(void * func, int num_of_threads, void * arg){
+//it doesn't matter the order it will consume n many produces as a queue
+
+pthread_t * create_thread(void * (*func)(void *), int num_of_threads, void * arg){
     
-    thread = malloc(num_of_threads * sizeof(pthread_t));
-    n = num_of_threads;
+    pthread_t * tids = malloc((size_t)num_of_threads * sizeof *tids);
+    if(!tids) return NULL;
 
     for (int i = 0; i < num_of_threads; i++){
-        if (arg) //null check
-        pthread_create(&thread[i], NULL, func, arg);
+        pthread_create(&tids[i], 0, func, arg);
     }
-    return 0;
+    return tids;
 }
 
-
-void wait_thread(void * thread){
+void wait_thread(pthread_t * t, int n){
     for (int i = 0; i < n; i++){
-        pthread_join(&thread[i], NULL);
+        pthread_join(t[i], 0);
     }
+    free(t);
 }

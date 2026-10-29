@@ -1,7 +1,5 @@
-
-
 void ** thread;
 
-int create_thread(void * func, int num_of_threads, void * arg);
+pthread_t * create_thread(void * (*func)(void *), int num_of_threads, void * arg);
 
-void wait_thread(void ** thread);
+void wait_thread(pthread_t * t, int n);
